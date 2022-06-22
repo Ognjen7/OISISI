@@ -28,6 +28,7 @@ import oisisi.model.Objekat;
 import oisisi.model.Render;
 import oisisi.model.Softver;
 import oisisi.model.Zaposleni;
+import oisisi.view.About;
 import oisisi.view.AddSoftver;
 import oisisi.view.AddZaposleni;
 import oisisi.view.DeleteSoftveri;
@@ -121,8 +122,10 @@ public class MainApp {
 
 		frame = new JFrame();
 		frame.setTitle("OISISI PROJEKAT");
+		
 		frame.setBounds(startX, startY, width, height); 
 		//frame.setBounds(100,100,873,565); //TODO OVO JE SAMO ZA TEST, OTKOMENTARISATI LINIJU IZNAD
+		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
         JMenuItem addMenuItem = new JMenuItem();
@@ -278,8 +281,87 @@ public class MainApp {
 		JMenu mnNewMenu_2 = new JMenu("Help");
 		menuBar.add(mnNewMenu_2);
 		
+		JMenuItem mntmNewMenuItem_7 = new JMenuItem("About");
+		mnNewMenu_2.add(mntmNewMenuItem_7);
+		
 		JMenuBar menuBar_1 = new JMenuBar();
 		menuBar.add(menuBar_1);
+		
+		mntmNewMenuItem.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	selectedTabIndex = tabbedPane.getSelectedIndex();
+	                	
+	                	if(selectedTabIndex == 0) {
+	                		addZaposleni();
+	                	}
+	                	if(selectedTabIndex == 1) {
+	                		addSoftveri();
+	                	}
+	                }
+	            });
+		
+		mntmNewMenuItem_5.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	tabbedPane.setSelectedIndex(0);
+	                }
+	            });
+		
+		mntmNewMenuItem_6.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	tabbedPane.setSelectedIndex(1);
+	                }
+	            });
+		
+		mntmNewMenuItem_2.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	System.exit(0);
+	                }
+	            });
+		
+		mntmNewMenuItem_3.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	selectedTabIndex = tabbedPane.getSelectedIndex();
+	                	
+	                	if(selectedTabIndex == 0) {
+	                		int selectedRowIndex = table_1.getSelectedRow();
+	                		editZaposleni(selectedRowIndex);
+	                	}
+	                	
+	                	if(selectedTabIndex == 1) {
+	                		int selectedRowIndex = table_2.getSelectedRow();
+	                		editSoftveri(selectedRowIndex);
+	                	}
+	                }
+	            });
+		
+		mntmNewMenuItem_4.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	selectedTabIndex = tabbedPane.getSelectedIndex();
+	                	
+	                	if(selectedTabIndex == 0) {
+	                		int selectedRowIndex = table_1.getSelectedRow();
+	                		deleteZaposleni(selectedRowIndex);
+	                	}
+	                	
+	                	if(selectedTabIndex == 1) {
+	                		int selectedRowIndex = table_2.getSelectedRow();
+	                		deleteSoftveri(selectedRowIndex);
+	                	}
+	                }
+	            });
+		
+		mntmNewMenuItem_7.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	about();
+	                }
+	            });
 		
 		updateZaposleni();
 		updateSoftveri();
@@ -288,6 +370,12 @@ public class MainApp {
 		popupErrorPanel.add(new JLabel("Greska! Niste izabrali softver ili zaposlenog! Izaberite i pokusajte ponovo.", SwingConstants.CENTER));
 		
 	}
+	
+	private void about() {
+		About aboutFrame = new About();
+		aboutFrame.setVisible(true);
+	}
+	
 	
 	private void addZaposleni() {
 		
