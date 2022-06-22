@@ -217,6 +217,7 @@ public class EditZaposleni extends JDialog {
 			for(int j = 0; j < zaposleniEdit.getSoftveri().size(); j++) {
 				if(MainApp.softveri.get(i).getNaziv().equals(zaposleniEdit.getSoftveri().get(j).getNaziv())) {
 					listSelectedValues[listSelectedValuesIndex] = i;
+					listSelectedValuesIndex++;
 				}
 			}
 		}

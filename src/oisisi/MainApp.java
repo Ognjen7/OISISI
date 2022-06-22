@@ -28,9 +28,13 @@ import oisisi.model.Objekat;
 import oisisi.model.Render;
 import oisisi.model.Softver;
 import oisisi.model.Zaposleni;
+import oisisi.view.AddSoftver;
 import oisisi.view.AddZaposleni;
+import oisisi.view.DeleteSoftveri;
+import oisisi.view.DeleteSoftveriFinal;
 import oisisi.view.DeleteZaposleni;
 import oisisi.view.DeleteZaposleniFinal;
+import oisisi.view.EditSoftver;
 import oisisi.view.EditZaposleni;
 
 import java.awt.BorderLayout;
@@ -55,6 +59,9 @@ public class MainApp {
 	private String[] podaciTabelaZaposleni = {"Ime", "Prezime", "Jmbg", "Datum rodjenja", "Email", "Adresa stanovanja", "Softveri"};
 	private Object[][] podaciZaposleni;
 	
+	private String[] podaciTabelaSoftveri = {"Naziv", "Cetkice", "Fajl format", "Alati za animaciju", "Render"};
+	private Object[][] podaciSoftveri;
+	
 	
 	//Podaci stavljeni ovde da mogu sve funkcije da im pristupe
 	public static ArrayList<Cetkica> cetkice = new ArrayList<Cetkica>();
@@ -71,8 +78,7 @@ public class MainApp {
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
 	private final JPanel popupErrorPanel = new JPanel();
-	
-	public static boolean closeAddZaposleni = false;
+	private JTable table_2;
 	
 	/**
 	 * Launch the application.
@@ -115,8 +121,8 @@ public class MainApp {
 
 		frame = new JFrame();
 		frame.setTitle("OISISI PROJEKAT");
-		//frame.setBounds(startX, startY, width, height); 
-		frame.setBounds(100,100,873,565); //TODO OVO JE SAMO ZA TEST, OTKOMENTARISATI LINIJU IZNAD
+		frame.setBounds(startX, startY, width, height); 
+		//frame.setBounds(100,100,873,565); //TODO OVO JE SAMO ZA TEST, OTKOMENTARISATI LINIJU IZNAD
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
         JMenuItem addMenuItem = new JMenuItem();
@@ -181,7 +187,7 @@ public class MainApp {
 	                	}
 	                	
 	                	if(selectedTabIndex == 1) {
-	                		System.out.println("Dodavanje softvera");
+	                		addSoftveri();
 	                	}
 	                }
 	            });
@@ -197,7 +203,9 @@ public class MainApp {
 	                	}
 	                	
 	                	if(selectedTabIndex == 1) {
-	                		System.out.println("Izmena softvera");
+	                		int selectedRowIndex = table_2.getSelectedRow();
+	                		System.out.println(selectedRowIndex);
+	                		editSoftveri(selectedRowIndex);
 	                	}
 	                }
 	            });
@@ -213,7 +221,8 @@ public class MainApp {
 	                	}
 	                	
 	                	if(selectedTabIndex == 1) {
-	                		System.out.println("Brisanje softvera");
+	                		int selectedRowIndex = table_2.getSelectedRow();
+	                		deleteSoftveri(selectedRowIndex);
 	                	}
 	                	
 	                }
@@ -221,6 +230,20 @@ public class MainApp {
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
 		tabbedPane.addTab("Softveri", null, scrollPane_1, null);
+		
+		table_2 = new JTable() {
+	        private static final long serialVersionUID = 1L;
+
+	        public boolean isCellEditable(int row, int column) {                
+	                return false;               
+	        };
+	    };
+	    
+		table_2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table_2.setModel(new DefaultTableModel( podaciSoftveri, podaciTabelaSoftveri));
+		table_2.setFillsViewportHeight(true);
+		
+		scrollPane_1.setViewportView(table_2);
 		
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setToolTipText("");
@@ -259,6 +282,7 @@ public class MainApp {
 		menuBar.add(menuBar_1);
 		
 		updateZaposleni();
+		updateSoftveri();
 		
 		// MODALNI PROZORI ------------------------------------------
 		popupErrorPanel.add(new JLabel("Greska! Niste izabrali softver ili zaposlenog! Izaberite i pokusajte ponovo.", SwingConstants.CENTER));
@@ -462,6 +486,201 @@ public class MainApp {
 		table_1.setModel(new DefaultTableModel(podaciZaposleni, podaciTabelaZaposleni));
 		
 	}
+	
+	//---softveri
+	private void addSoftveri() {
+		
+		AddSoftver addSoftveriFrame = new AddSoftver();
+		
+		JButton cancelButton = new JButton("CANCEL");
+		addSoftveriFrame.getContentPane().add(cancelButton);
+		
+		JButton okButton = new JButton("OK");
+		addSoftveriFrame.getContentPane().add(okButton);
+		
+		cancelButton.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	addSoftveriFrame.dispose();
+	                }
+	            });
+		
+		okButton.addActionListener(
+				new ActionListener(){
+	                public void actionPerformed(ActionEvent e){
+	                	
+	                	String naziv = AddSoftver.textField.getText();
+	                	List<String> cetkiceList = AddSoftver.list1.getSelectedValuesList();
+	                	String fajlFormat = AddSoftver.textField_1.getText();
+	                	List<String> alatiList = AddSoftver.list2.getSelectedValuesList();
+	                	int render = AddSoftver.list3.getSelectedIndex();
+	                	
+	                	if(!naziv.isEmpty() && !cetkiceList.isEmpty() && !fajlFormat.isEmpty() && !alatiList.isEmpty() && render >= 0) {
+	                		
+	                		softveri.add(new Softver(
+	                				naziv,
+	                				cetkiceList,
+	                				fajlFormat,
+	                				alatiList,
+	                				render
+	                				));
+	                		
+		                	updateSoftveri();
+		                
+		                	addSoftveriFrame.dispose();
+	                	}
+	                }
+	            });
+		
+		addSoftveriFrame.pack();
+		addSoftveriFrame.setModal(true);
+		addSoftveriFrame.setVisible(true);
+	}
+	
+	private void editSoftveri(int selectedRowIndex) {
+
+		if(selectedRowIndex == -1) {
+			final JDialog dialog = new JDialog(frame, "GRESKA!", true);
+			dialog.setBounds((int) (screenSize.getWidth()*0.7/2), (int) (screenSize.getHeight()*0.7/2), (int) (screenSize.getWidth()*0.1), (int) (screenSize.getHeight()*0.1));
+			dialog.getContentPane().add(popupErrorPanel);
+			dialog.pack();
+			dialog.setModal(true);
+			dialog.setVisible(true);
+		} else {
+			EditSoftver editSoftveriFrame = new EditSoftver(selectedRowIndex);
+			
+			JButton cancelButton = new JButton("CANCEL");
+			editSoftveriFrame.getContentPane().add(cancelButton);
+			
+			JButton okButton = new JButton("OK");
+			editSoftveriFrame.getContentPane().add(okButton);
+			
+			cancelButton.addActionListener(
+					new ActionListener(){
+		                public void actionPerformed(ActionEvent e){
+		                	editSoftveriFrame.dispose();
+		                }
+		            });
+			
+			okButton.addActionListener(
+					new ActionListener(){
+		                public void actionPerformed(ActionEvent e){
+		                	
+		                	String naziv = EditSoftver.textField.getText();
+		                	List<String> cetkiceList = EditSoftver.list1.getSelectedValuesList();
+		                	String fajlFormat = EditSoftver.textField_1.getText();
+		                	List<String> alatiList = EditSoftver.list2.getSelectedValuesList();
+		                	int render = EditSoftver.list3.getSelectedIndex();
+		                	
+		                	if(!naziv.isEmpty() && !cetkiceList.isEmpty() && !fajlFormat.isEmpty() && !alatiList.isEmpty() && render >= 0) {
+		                		
+		                		Softver editedSoftver = new Softver( naziv, cetkiceList, fajlFormat, alatiList, render);
+		                		
+		                		softveri.remove(selectedRowIndex);
+		                		softveri.add(selectedRowIndex, editedSoftver);
+		                		
+			                	updateSoftveri();
+			                
+			                	editSoftveriFrame.dispose();
+		                	}
+		                }
+		            });
+			
+			editSoftveriFrame.pack();
+			editSoftveriFrame.setModal(true);
+			editSoftveriFrame.setVisible(true);
+		}
+
+	}
+	
+	private void deleteSoftveri(int selectedRowIndex) {
+		
+		if(selectedRowIndex == -1) {
+			final JDialog dialog = new JDialog(frame, "GRESKA!", true);
+			dialog.setBounds((int) (screenSize.getWidth()*0.7/2), (int) (screenSize.getHeight()*0.7/2), (int) (screenSize.getWidth()*0.1), (int) (screenSize.getHeight()*0.1));
+			dialog.getContentPane().add(popupErrorPanel);
+			dialog.pack();
+			dialog.setModal(true);
+			dialog.setVisible(true);
+		} else {
+			DeleteSoftveri deleteSoftveriFrame = new DeleteSoftveri(selectedRowIndex);
+			
+			JButton cancelButton = new JButton("CANCEL");
+			deleteSoftveriFrame.getContentPane().add(cancelButton);
+			
+			JButton okButton = new JButton("OK");
+			deleteSoftveriFrame.getContentPane().add(okButton);
+			
+			cancelButton.addActionListener(
+					new ActionListener(){
+		                public void actionPerformed(ActionEvent e){
+		                	deleteSoftveriFrame.dispose();
+		                }
+		            });
+			
+			okButton.addActionListener(
+					new ActionListener(){
+		                public void actionPerformed(ActionEvent e){
+		                	
+		                	DeleteSoftveriFinal deleteSoftveriFinalFrame = new DeleteSoftveriFinal(selectedRowIndex);
+		        			
+		        			JButton cancelButton = new JButton("CANCEL");
+		        			deleteSoftveriFinalFrame.getContentPane().add(cancelButton);
+		        			
+		        			JButton okButton = new JButton("OK");
+		        			deleteSoftveriFinalFrame.getContentPane().add(okButton);
+		        			
+		        			cancelButton.addActionListener(
+		        					new ActionListener(){
+		        		                public void actionPerformed(ActionEvent e){
+		        		                	deleteSoftveriFinalFrame.dispose();
+		        		                	deleteSoftveriFrame.dispose();
+		        		                }
+		        		            });
+		        			
+		        			okButton.addActionListener(
+		        					new ActionListener(){
+		        		                public void actionPerformed(ActionEvent e){
+		        	                		softveri.remove(selectedRowIndex);
+		        		                	updateSoftveri();
+		        		                	deleteSoftveriFinalFrame.dispose();
+		        		                	deleteSoftveriFrame.dispose();
+		        		                }
+		        		            });
+		        			
+		        			deleteSoftveriFinalFrame.pack();
+		        			deleteSoftveriFinalFrame.setModal(true);
+		        			deleteSoftveriFinalFrame.setVisible(true);
+		                }
+		            });
+			
+			deleteSoftveriFrame.pack();
+			deleteSoftveriFrame.setModal(true);
+			deleteSoftveriFrame.setVisible(true);
+		}
+	}
+	
+	private void updateSoftveri() {
+		
+		podaciSoftveri = null;
+		
+		podaciSoftveri = new Object[softveri.size()][5];
+		
+		for (int i = 0; i < softveri.size(); i++) {
+			
+			String[] podaci = {
+					softveri.get(i).getNaziv(),
+					softveri.get(i).getCetkiceToString(),
+					softveri.get(i).getFajlFormat(),
+					softveri.get(i).getAlatiZaAnimacijuToString(),
+					softveri.get(i).getRenderToString(),
+					};
+			podaciSoftveri[i] = podaci;
+		}
+		
+		table_2.setModel(new DefaultTableModel(podaciSoftveri, podaciTabelaSoftveri));
+		
+	}
 
 	private void initializeData() {
 		
@@ -519,23 +738,23 @@ public class MainApp {
 		softveri.add(new Softver(
 				"Photoshop",
 				new ArrayList<Cetkica>(Arrays.asList(cetkice.get(1), cetkice.get(3))),
-				"PSD",
+				".PSD",
 				new ArrayList<Alati>(Arrays.asList(alati.get(0), alati.get(1))),
 				renderi.get(0)
 				));
 		softveri.add(new Softver(
 				"Substance Painter",
 				new ArrayList<Cetkica>(Arrays.asList(cetkice.get(0))),
-				"SPP",
+				".SPP",
 				new ArrayList<Alati>(Arrays.asList(alati.get(0))),
-				renderi.get(0)
+				renderi.get(2)
 				));
 		softveri.add(new Softver(
 				"3ds Max",
 				new ArrayList<Cetkica>(Arrays.asList(cetkice.get(0), cetkice.get(1), cetkice.get(2))),
-				"MAX",
+				".MAX",
 				new ArrayList<Alati>(Arrays.asList(alati.get(0), alati.get(1), alati.get(2), alati.get(3))),
-				renderi.get(0)
+				renderi.get(1)
 				));
 		
 		

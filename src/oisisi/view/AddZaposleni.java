@@ -39,6 +39,8 @@ public class AddZaposleni extends JDialog {
 		int startY = (int) ((screenSize.getHeight()-400)/2);
 		
 		setBounds(startX, startY, 750, 400);
+		//setBounds(0, 0, 750, 400);
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -203,7 +205,6 @@ public class AddZaposleni extends JDialog {
 		}
 		
 		list.setModel(new AbstractListModel() {
-			
 			public int getSize() {
 				return listValues.length;
 			}
